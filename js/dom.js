@@ -1,5 +1,4 @@
 import { capitalize } from "./script.js";
-import { state } from "./state.js";
 
 export const createLoader = () => {
   const loader = document.createElement("div");
@@ -39,14 +38,10 @@ const createCardHeader = (name, types) =>
   ]);
 
 const createStatRows = (stats) =>
-  stats.map((stat) => {
+  stats.map(({ stat, base_stat }) => {
     const div = createElementTemplate("div", [["class", "name-power"]], [
-      createElementTemplate(
-        "p",
-        [["class", "name"]],
-        capitalize(stat.stat.name),
-      ),
-      createElementTemplate("p", [["class", "power"]], stat.base_stat),
+      createElementTemplate("p", [["class", "name"]], capitalize(stat.name)),
+      createElementTemplate("p", [["class", "power"]], base_stat),
     ]);
 
     return div;
@@ -61,21 +56,19 @@ const createCardMetadata = (name, types, stats) =>
     createStatsSection(stats),
   ]);
 
-const createImageSection = (pokeUrl, name, types) =>
-  createElementTemplate(
-    "div",
-    [[
-      "class",
-      "img-container",
-    ], [
-      "style",
-      `background-image: linear-gradient(${createImageGradient(types)},white)`,
-    ]],
-    [createElementTemplate("img", [["src", pokeUrl], ["alt", `${name} image`], [
-      "class",
-      "poke-image",
-    ]], "")],
-  );
+const createImageSection = (pokeUrl, name, types) => {
+  const attributes = [["class", "img-container"], [
+    "style",
+    `background-image: linear-gradient(${createImageGradient(types)},white)`,
+  ]];
+
+  const imageTag = createElementTemplate("img", [["src", pokeUrl], [
+    "alt",
+    `${name} image`,
+  ], ["class", "poke-image"]], "");
+
+  return createElementTemplate("div", attributes, [imageTag]);
+};
 
 const createPokemonCardTemplates = (pokemon) =>
   pokemon.map(({ sprites, name, types, stats }) => {
