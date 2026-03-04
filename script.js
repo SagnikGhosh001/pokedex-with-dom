@@ -1,132 +1,6 @@
 const fetchPokemonData = () =>
   fetch("./pokemons.json").then((res) => res.json());
 
-const dbg = (x) => console.log(x) || x;
-
-const capitalize = (str) => str ? str[0].toUpperCase() + str.slice(1) : "";
-
-const createLoader = () => {
-  const loader = document.createElement("div");
-  loader.classList.add("loader");
-  return loader;
-};
-
-const createPokemonImage = (imageUrl) => {
-  const image = document.createElement("img");
-  image.src = imageUrl;
-  image.alt = "pokemon-image";
-  image.classList.add("poke-image");
-
-  return image;
-};
-
-const createImageGradient = (types) =>
-  types.map((t) => `var(--${t.type.name})`).join(",");
-
-const createNamePowerStats = (s) => {
-  const name = document.createElement("p");
-  const power = document.createElement("p");
-  name.classList.add("name");
-  power.classList.add("power");
-
-  name.innerText = capitalize(s.stat.name);
-  power.innerText = s.base_stat;
-  return { name, power };
-};
-
-const createStats = (stats) => {
-  const statsDiv = document.createElement("div");
-  statsDiv.classList.add("stats");
-
-  stats.forEach((s) => {
-    const namePowerDiv = document.createElement("div");
-    namePowerDiv.classList.add("name-power");
-
-    const { name, power } = createNamePowerStats(s);
-
-    namePowerDiv.append(name, power);
-    statsDiv.appendChild(namePowerDiv);
-  });
-
-  return statsDiv;
-};
-
-const createImageContainer = (imageUrl, types) => {
-  const div = document.createElement("div");
-  div.classList.add("img-container");
-  div.style.backgroundImage = `linear-gradient(${
-    createImageGradient(types)
-  }, white)`;
-
-  const image = createPokemonImage(imageUrl);
-  div.appendChild(image);
-  return div;
-};
-
-const createHeaderName = (pokemonName) => {
-  const name = document.createElement("div");
-  name.classList.add("name");
-  const h1 = document.createElement("h1");
-  h1.classList.add("name");
-  h1.innerText = capitalize(pokemonName);
-
-  name.appendChild(h1);
-  return name;
-};
-
-const createHeaderTypes = (pokemonTypes) => {
-  const types = document.createElement("div");
-  types.classList.add("types");
-  pokemonTypes.forEach((t) => {
-    const p = document.createElement("p");
-    p.classList.add("type", t.type.name);
-    p.innerText = capitalize(t.type.name);
-
-    types.appendChild(p);
-  });
-
-  return types;
-};
-
-const createMetaDataHeader = (name, types) => {
-  const header = document.createElement("div");
-  header.classList.add("header");
-  const headerName = createHeaderName(name);
-  const headerTypes = createHeaderTypes(types);
-
-  header.append(headerName, headerTypes);
-  return header;
-};
-
-const createMetaDataDiv = (name, types, stats) => {
-  const metaData = document.createElement("div");
-  metaData.classList.add("meta-data");
-
-  const metaDataHeader = createMetaDataHeader(name, types);
-  const metaDataStats = createStats(stats);
-
-  metaData.append(metaDataHeader, metaDataStats);
-  return metaData;
-};
-
-const createCard = ({ sprites, name, types, stats }) => {
-  const card = document.createElement("div");
-  card.classList.add("card");
-
-  const imageContainer = createImageContainer(
-    sprites.other["official-artwork"].front_default,
-    types,
-  );
-
-  const metaData = createMetaDataDiv(name, types, stats);
-
-  card.append(imageContainer, metaData);
-  return card;
-};
-
-const createCards = (pokemons) =>
-  pokemons.map((pokemon) => createCard(pokemon));
-
 const filterPokemon = (pokemons, searchedPokemon, type) =>
   pokemons.filter((pokemon) => {
     const matchesType = type === "all" ||
@@ -138,19 +12,12 @@ const filterPokemon = (pokemons, searchedPokemon, type) =>
     return matchesType && matchesSearch;
   });
 
-const displayCards = (pokemons) => {
-  const container = document.querySelector(".container");
-  container.innerHTML = "";
-  const cards = createCards(pokemons);
-  container.append(...cards);
-};
-
 const updateInputStyle = (type) => {
   const input = document.querySelector(".search-bar>form>input");
   input.style.setProperty("--type", `var(--${type})`);
 };
 
-const handleSideBarNavigation = (pokemons, filterMetaData) => {
+const handleSideBarNavigation = (pokemons, filterMetaData, container) => {
   const sidebar = document.querySelector(".side-bar");
 
   sidebar.addEventListener("click", (e) => {
@@ -167,11 +34,11 @@ const handleSideBarNavigation = (pokemons, filterMetaData) => {
       filterMetaData.type,
     );
 
-    displayCards(filteredPokemon);
+    displayPokemons(filteredPokemon, container);
   });
 };
 
-const handleSearch = (pokemons, filterMetaData) => {
+const handleSearch = (pokemons, filterMetaData, container) => {
   const input = document.querySelector(".search-bar>form>input");
 
   input.addEventListener("input", () => {
@@ -183,22 +50,143 @@ const handleSearch = (pokemons, filterMetaData) => {
       filterMetaData.type,
     );
 
-    displayCards(filteredPokemon);
+    displayPokemons(filteredPokemon, container);
   });
 };
 
-const handleFiltering = (pokemons) => {
+const handleFiltering = (pokemons, container) => {
   const filterMetaData = { type: "all", search: "" };
-  handleSideBarNavigation(pokemons, filterMetaData);
-  handleSearch(pokemons, filterMetaData);
+  handleSideBarNavigation(pokemons, filterMetaData, container);
+  handleSearch(pokemons, filterMetaData, container);
+};
+
+const createLoader = () => {
+  const loader = document.createElement("div");
+  loader.setAttribute("class", "loader");
+  return loader;
+};
+
+const capitalize = (str) => str ? str[0].toUpperCase() + str.slice(1) : "";
+
+const createImageGradient = (types) =>
+  types.map((t) => `var(--${t.type.name})`).join(",");
+
+const createBasicElements = (tag, attributes, contents) => ({
+  tag,
+  attributes,
+  contents,
+});
+
+const createNameContainer = (name) =>
+  createBasicElements("div", [["class", "name"]], [
+    createBasicElements("h1", [["class", "name"]], capitalize(name)),
+  ]);
+
+const createTypesContainer = (types) =>
+  createBasicElements(
+    "div",
+    [["class", "types"]],
+    types.map((type) => {
+      const p = createBasicElements("p", [[
+        "class",
+        `type ${type.type.name}`,
+      ]], capitalize(type.type.name));
+      return p;
+    }),
+  );
+
+const createHeaderContainer = (name, types) =>
+  createBasicElements("div", [["class", "header"]], [
+    createNameContainer(name),
+    createTypesContainer(types),
+  ]);
+
+const createStatsContainer = (stats) =>
+  createBasicElements(
+    "div",
+    [["class", "stats"]],
+    stats.map((stat) => {
+      const div = createBasicElements("div", [["class", "name-power"]], [
+        createBasicElements(
+          "p",
+          [["class", "name"]],
+          capitalize(stat.stat.name),
+        ),
+        createBasicElements("p", [["class", "power"]], stat.base_stat),
+      ]);
+
+      return div;
+    }),
+  );
+
+const createMetaDataContainer = (name, types, stats) =>
+  createBasicElements("div", [["class", "meta-data"]], [
+    createHeaderContainer(name, types),
+    createStatsContainer(stats),
+  ]);
+
+const createImageContainer = (pokeUrl, types) =>
+  createBasicElements(
+    "div",
+    [[
+      "class",
+      "img-container",
+    ], [
+      "style",
+      `background-image: linear-gradient(${createImageGradient(types)},white)`,
+    ]],
+    [createBasicElements("img", [["src", pokeUrl], ["alt", "pokemon image"], [
+      "class",
+      "poke-image",
+    ]], "")],
+  );
+
+const createFregmentTemplate = (allPokemon) =>
+  allPokemon.map(({ sprites, name, types, stats }) => {
+    const card = createBasicElements("div", [["class", "card"]], []);
+
+    const imageContainer = createImageContainer(
+      sprites.other["official-artwork"].front_default,
+      types,
+    );
+    const metaDataContainer = createMetaDataContainer(name, types, stats);
+    card.contents.push(imageContainer, metaDataContainer);
+
+    return card;
+  });
+
+const addAttributes = (element, attributes) =>
+  attributes.forEach(([key, value]) => {
+    element.setAttribute(key, value);
+  });
+
+const createFragment = (fragments) =>
+  fragments.map(({ tag, attributes, contents }) => {
+    const element = document.createElement(tag);
+    addAttributes(element, attributes);
+
+    if (Array.isArray(contents)) {
+      const nestedChildren = createFragment(contents);
+      element.append(...nestedChildren);
+      return element;
+    }
+
+    element.textContent = contents;
+    return element;
+  });
+
+const displayPokemons = (allPokemon, container) => {
+  const fragments = createFregmentTemplate(allPokemon);
+  const children = createFragment(fragments);
+  container.replaceChildren(...children);
 };
 
 window.onload = async () => {
   const loader = createLoader();
   document.body.appendChild(loader);
-  const pokemons = await fetchPokemonData();
+  const allPokemon = await fetchPokemonData();
   document.body.removeChild(loader);
-
-  displayCards(pokemons);
-  handleFiltering(pokemons);
+  const container = document.querySelector(".container");
+  displayPokemons(allPokemon, container);
+  handleFiltering(allPokemon, container);
 };
