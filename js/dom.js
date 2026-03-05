@@ -6,35 +6,25 @@ export const createLoader = () => {
   return loader;
 };
 
+const cls = (className) => ({ class: className });
+
 const createPokemonName = (
   name,
-) => [
-  "div",
-  { "class": "name" },
-  ["h1", { "class": "name" }, name],
-];
+) => ["div", cls("name"), ["h1", cls("name"), name]];
 
 const createTypeBadges = (types) =>
-  types.map((type) => {
-    const p = [
-      "p",
-      { "class": `type ${type.type.name}` },
-      type.type.name,
-    ];
-
-    return p;
-  });
+  types.map((type) => ["p", cls(`type ${type.type.name}`), type.type.name]);
 
 const createTypeBadgeContainer = (
   types,
-) => ["div", { "class": "types" }, ...createTypeBadges(types)];
+) => ["div", cls("types"), ...createTypeBadges(types)];
 
 const createCardHeader = (
   name,
   types,
 ) => [
   "div",
-  { "class": "header" },
+  cls("header"),
   createPokemonName(name),
   createTypeBadgeContainer(types),
 ];
@@ -44,25 +34,25 @@ const createStatRows = (stats) =>
     { stat, base_stat },
   ) => [
     "div",
-    { "class": "name-power" },
-    ["p", { "class": "name" }, stat.name],
-    ["p", { "class": "power" }, base_stat],
+    cls("name-power"),
+    ["p", cls("name"), stat.name],
+    ["p", cls("power"), base_stat],
   ]);
 
 const createStatsSection = (
   stats,
-) => ["div", { "class": "stats" }, ...createStatRows(stats)];
+) => ["div", cls("stats"), ...createStatRows(stats)];
 
 const createCardMetadata = (name, types, stats) => [
   "div",
-  { "class": "meta-data" },
+  cls("meta-data"),
   createCardHeader(name, types),
   createStatsSection(stats),
 ];
 
 const createImageSection = (pokeUrl, name, types) => {
   const attributes = {
-    "class": "img-container",
+    ...cls("img-container"),
     "style": `background-image: linear-gradient(${
       createImageGradient(types)
     },white)`,
@@ -71,7 +61,7 @@ const createImageSection = (pokeUrl, name, types) => {
   const imageTag = ["img", {
     "src": pokeUrl,
     "alt": `${name} image`,
-    "class": "poke-image",
+    ...cls("poke-image"),
   }, ""];
 
   return ["div", attributes, imageTag];
@@ -79,7 +69,7 @@ const createImageSection = (pokeUrl, name, types) => {
 
 const createPokemonCardTemplates = (pokemon) =>
   pokemon.map(({ sprites, name, types, stats }) => {
-    const card = ["div", { "class": "card" }];
+    const card = ["div", cls("card")];
 
     const imageContainer = createImageSection(
       sprites.other["official-artwork"].front_default,
