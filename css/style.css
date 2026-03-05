@@ -165,7 +165,7 @@ body {
 
 .search-bar input {
   padding: 10px 15px;
-  width: 250px;
+  width: 550px;
   border-radius: 20px;
   border: 2px solid #ddd;
   outline: none;
@@ -176,15 +176,6 @@ body {
   border-color: var(--type);
 }
 
-.search-bar button {
-  padding: 10px 20px;
-  border: none;
-  border-radius: 20px;
-  cursor: pointer;
-  background: var(--type);
-  color: white;
-  background-color: black;
-}
 
 .loader {
   width: 60px;
