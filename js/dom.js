@@ -19,10 +19,7 @@ const createTypeBadgeContainer = (
   types,
 ) => ["div", cls("types"), ...createTypeBadges(types)];
 
-const createCardHeader = (
-  name,
-  types,
-) => [
+const createCardHeader = (name, types) => [
   "div",
   cls("header"),
   createPokemonName(name),
@@ -30,9 +27,7 @@ const createCardHeader = (
 ];
 
 const createStatRows = (stats) =>
-  stats.map((
-    { stat, base_stat },
-  ) => [
+  stats.map(({ stat, base_stat }) => [
     "div",
     cls("name-power"),
     ["p", cls("name"), stat.name],
